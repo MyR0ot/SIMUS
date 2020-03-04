@@ -1,27 +1,19 @@
 package logic;
 
-
-import it.ssc.log.SscLogger;
 import it.ssc.pl.milp.ConsType;
-import it.ssc.pl.milp.Constraint;
 import it.ssc.pl.milp.GoalType;
-import it.ssc.pl.milp.LP;
 import it.ssc.pl.milp.LPException;
-import it.ssc.pl.milp.LinearObjectiveFunction;
 import it.ssc.pl.milp.SimplexException;
 import it.ssc.pl.milp.Solution;
-import it.ssc.pl.milp.SolutionType;
 import it.ssc.pl.milp.Variable;
 import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JFrame;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.WindowConstants;
 import static logic.SIMUS.SIMPLEX;
 
 
@@ -42,9 +34,8 @@ public class Init {
        // startGUI();
        // test1();
        // test2();
-       
-       test3();
-       
+       // test3();
+       parseTest("tests/test_8x5_0.txt");       
        // printMatrix(simus.getERM());
     }  
     
@@ -309,4 +300,92 @@ public class Init {
          }
         
      }
+     
+     public static void parseTest(String fileName){
+        Scanner scan;
+        File file = new File(fileName);
+        
+        int n, m;
+        double[][] idm;
+        double[] rhs;
+        ConsType[] rhsSigns;
+        GoalType[] actions;
+        
+        
+        try {
+            scan = new Scanner(file);
+
+            n = scan.nextInt();
+            m = scan.nextInt();
+        
+            idm = new double[n][m];
+            rhs = new double[n];
+            rhsSigns = new ConsType[n];
+            actions = new GoalType[n];
+            
+            for(int i = 0; i< n; i++)
+                for(int j = 0; j<m; j++)
+                    idm[i][j] = scan.nextDouble();
+        
+            for(int i = 0; i< n; i++){
+                if(scan.nextInt() == 1){
+                    actions[i] = GoalType.MAX;
+                } else {
+                    actions[i] = GoalType.MIN;
+                }
+            }
+            
+            for(int i = 0; i < n; i++){
+                switch(scan.nextInt())
+                {
+                    case 1: rhsSigns[i] = ConsType.GE; break;
+                    case 2: rhsSigns[i] = ConsType.LE; break;
+                    case 3: rhsSigns[i] = ConsType.UPPER; break;
+                    case 4: rhsSigns[i] = ConsType.LOWER; break;
+                    case 5: rhsSigns[i] = ConsType.EQ; break;
+                }
+            }
+            
+            for(int i = 0; i<n; i++)
+                rhs[i] = scan.nextDouble();
+            
+            showInitData(idm, rhs, rhsSigns, actions);
+        } 
+        catch (FileNotFoundException e1) {
+        }
+                
+     }
+     
+     @Deprecated
+     public static void showInitData(double[][] idm, double[] rhs, ConsType[] rhsSigns, GoalType[] actions) {
+        for (int i = 0; i < idm.length; i++) {
+            for (int j = 0; j < idm[0].length; j++) {
+                System.out.print(idm[i][j] + " ");
+            }
+            switch (rhsSigns[i]) {
+                case LE:
+                    System.out.print("<= ");
+                    break;
+                case GE:
+                    System.out.print(">= ");
+                    break;
+                case LOWER:
+                    System.out.print("< ");
+                    break;
+                case UPPER:
+                    System.out.print("> ");
+                    break;
+                case EQ: {
+                    System.out.print("= ");
+                    break;
+                }
+                default: {
+                    System.out.print("? ");
+                    break;
+                }
+            }
+
+            System.out.print(rhs[i] + " " + actions[i].toString() + "\n");
+        }
+    }
 }
