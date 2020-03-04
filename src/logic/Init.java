@@ -7,10 +7,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.util.Locale;
 import java.util.Scanner;
-import java.util.stream.Collectors;
 
 
 
@@ -22,20 +20,17 @@ public class Init {
     
     public static void main(String args[]) throws IOException{
       
-       File[] folderEntries = new File("tests/input/").listFiles();
-        for (File entry : folderEntries)
-        {
-            System.err.println(entry.getName());
-            if (!entry.isDirectory())
-            {
-                InputData data = parseTest(entry.getPath());
-                SIMUS simus = new SIMUS(data);
-
-                if(simus.runLogic()) writeToFile(simus.getLog(), "tests/answers/corrected/" + entry.getName());
-                else writeToFile(simus.getLog(), "tests/answers/notCorrected/" + entry.getName());
-                
-            }
-        }
+      
+      
+      
+      ConstraintData constraint = new ConstraintData(50, 50, 0, 100, POSITIVE_INF, POSITIVE_INF/2);
+      for(int i = 1; i <= 5; i++){
+          InputData data = generateRndData(constraint, 2);
+          createTestFile(data, "tests/input/test_50x50_" + i + ".txt");
+      }
+      
+      
+      calculateExistTest();
     }  
      
      public static void writeToFile(String str, String fileName) {
@@ -46,12 +41,13 @@ public class Init {
          } catch(IOException e){
              
          }
-        
      }
      
      public static InputData parseTest(String fileName){
         InputData res = new InputData();
         Scanner scan;
+        
+        
         File file = new File(fileName);
         
         int n, m;        
@@ -131,4 +127,95 @@ public class Init {
             System.out.print(data.rhs[i] + " " + data.actions[i].toString() + "\n");
         }
     }
+     
+     
+     private static InputData generateRndData(ConstraintData constraint, int precision){
+         InputData res = new InputData();
+         res.idm = new double[constraint.getCriterionCount()][constraint.getAlternativeCount()];
+         res.rhs = new double[constraint.getCriterionCount()];
+         res.rhsSigns = new ConsType[constraint.getCriterionCount()];
+         res.actions = new GoalType[constraint.getCriterionCount()];
+         
+        for(int i = 0; i<constraint.getCriterionCount(); i++)
+            for(int j = 0; j<constraint.getAlternativeCount(); j++)
+                res.idm[i][j] = Support.getRndDouble(constraint.getMinIDMValue(), constraint.getMaxIDMValue(), precision);
+        
+
+        for(int i = 0; i < constraint.getCriterionCount(); i++)
+            res.rhs[i] = Support.getRndDouble(constraint.getMinRHSValue(), constraint.getMaxRHSValue(), precision);
+        
+        for(int i = 0; i<constraint.getCriterionCount(); i++){
+            if(Support.getRndBoolean()) res.rhsSigns[i] = ConsType.GE;
+            else res.rhsSigns[i] = ConsType.LE;
+        }
+        
+        for(int i = 0; i<constraint.getCriterionCount(); i++){
+            if(Support.getRndBoolean()) res.actions[i] = GoalType.MAX;
+            else res.actions[i] = GoalType.MIN;
+        }
+            
+        
+        return res;
+     }
+     
+     
+     private static void calculateExistTest(){
+	Locale.setDefault(new Locale("en", "EN"));
+                
+        File[] folderEntries = new File("tests/input/").listFiles();
+        for (File entry : folderEntries)
+        {
+            System.err.println(entry.getName());
+            if (!entry.isDirectory())
+            {
+                InputData data = parseTest(entry.getPath());
+                SIMUS simus = new SIMUS(data);
+
+                if(simus.runLogic()) writeToFile(simus.getLog(), "tests/answers/corrected/" + entry.getName());
+                else writeToFile(simus.getLog(), "tests/answers/notCorrected/" + entry.getName());
+                
+            }
+        }
+     }
+     
+     private static void createTestFile(InputData data, String fileName) {
+         String str = "";
+         str+=data.idm.length;
+         str+=" ";
+         str+=data.idm[0].length;
+         str+="\n";
+         for(int i = 0; i<data.idm.length; i++){
+             for(int j = 0; j<data.idm[0].length; j++)
+                 str += data.idm[i][j] + " ";
+             str += "\n";
+         }
+         for(int i = 0; i<data.actions.length; i++){
+             if(data.actions[i] == GoalType.MAX) str +="1 ";
+             else str += "0 ";
+         }
+        str += "\n";
+        
+        for(int i = 0; i < data.rhsSigns.length; i++){
+            switch(data.rhsSigns[i]){
+                case GE: str += "1 "; break;
+                case LE: str += "2 "; break;
+                case UPPER: str += "3 "; break;
+                case LOWER: str += "4 "; break;
+                case EQ: str += "5 "; break;
+            }
+         }
+        str += "\n";
+        
+        
+        for(int i = 0; i < data.rhs.length; i++)
+            str += data.rhs[i] + " ";
+                 
+         try{
+            BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
+            writer.write(str);
+            writer.close();
+         } catch(IOException e){
+             
+         }
+     }
 }
