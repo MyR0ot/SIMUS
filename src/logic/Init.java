@@ -22,17 +22,18 @@ public class Init {
     
     public static void main(String args[]) throws IOException{
       
-       File[] folderEntries = new File("tests/").listFiles();
+       File[] folderEntries = new File("tests/input/").listFiles();
         for (File entry : folderEntries)
         {
             System.err.println(entry.getName());
             if (!entry.isDirectory())
             {
-                String fileName = entry.getName();
-                InputData data = parseTest("tests/" + fileName);
+                InputData data = parseTest(entry.getPath());
                 SIMUS simus = new SIMUS(data);
-                simus.runLogic();
-                writeToFile(simus.getLog(), "tests/answers/" + fileName);
+
+                if(simus.runLogic()) writeToFile(simus.getLog(), "tests/answers/corrected/" + entry.getName());
+                else writeToFile(simus.getLog(), "tests/answers/notCorrected/" + entry.getName());
+                
             }
         }
     }  

@@ -17,6 +17,7 @@ public final class SIMUS {
     private final double[][] erm; // normalized efficient result matrix
     private String log = "";
     private String errorLog = "";
+    private Boolean isCorrect = true;
 
     public double[][] getERM() {
         return this.erm;
@@ -47,7 +48,7 @@ public final class SIMUS {
         }
     }
     
-    public void runLogic(){
+    public Boolean runLogic(){
         for (int i = 0; i < criterionCount; i++) {
             try {
                 Solution solution = SIMPLEX(removeCriterionFromIDM(i), // A
@@ -75,10 +76,14 @@ public final class SIMUS {
         // normalize(erm); TODO: Добавить нормальизацию
         
         appendToLog(this.toString(), false);
+        return isCorrect;
     }
     
     private void appendToLog(String str, Boolean isErrorLog){
-        if(isErrorLog) errorLog += str;
+        if(isErrorLog){
+            errorLog += str;
+            isCorrect = false;
+        }
         else log += str;
         
     }
