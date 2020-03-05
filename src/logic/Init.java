@@ -19,18 +19,16 @@ public class Init {
     public static final double NEGATIVE_INF = Double.MIN_VALUE/2.718281828459045;
     
     public static void main(String args[]) throws IOException{
+      test100x100();
       
-      
-      
-      
-      ConstraintData constraint = new ConstraintData(50, 50, 0, 100, POSITIVE_INF, POSITIVE_INF/2);
-      for(int i = 1; i <= 5; i++){
+      ConstraintData constraint = new ConstraintData(8, 1000, 0, 100, 500, 5000);
+      for(int i = 1; i <= 100; i++){
           InputData data = generateRndData(constraint, 2);
           createTestFile(data, "tests/input/test_50x50_" + i + ".txt");
       }
       
       
-      calculateExistTest();
+      calculateExistTest(true);
     }  
      
      public static void writeToFile(String str, String fileName) {
@@ -159,7 +157,10 @@ public class Init {
      }
      
      
-     private static void calculateExistTest(){
+     private static long calculateExistTest(boolean isTimerForOnlySuccessTest){
+         
+        long time = 0;
+        long start, finish;
 	Locale.setDefault(new Locale("en", "EN"));
                 
         File[] folderEntries = new File("tests/input/").listFiles();
@@ -169,13 +170,21 @@ public class Init {
             if (!entry.isDirectory())
             {
                 InputData data = parseTest(entry.getPath());
+                start = System.currentTimeMillis();
                 SIMUS simus = new SIMUS(data);
-
+                simus.runLogic();
+                finish = System.currentTimeMillis();
+                
+                if(!isTimerForOnlySuccessTest || simus.getIsSuccess()){
+                    time += (finish - start);
+                }
                 if(simus.runLogic()) writeToFile(simus.getLog(), "tests/answers/corrected/" + entry.getName());
                 else writeToFile(simus.getLog(), "tests/answers/notCorrected/" + entry.getName());
                 
             }
         }
+        
+        return time;
      }
      
      private static void createTestFile(InputData data, String fileName) {
@@ -218,4 +227,15 @@ public class Init {
              
          }
      }
+     
+     private static void test100x100(){                  
+        ConstraintData constraint = new ConstraintData(100, 100, 0, 100, 10000, 100000);
+        for(int i = 1; i <= 100; i++){
+            InputData data = generateRndData(constraint, 2);
+            createTestFile(data, "tests/input/test_100x100_" + i + ".txt");
+        }
+        long time = calculateExistTest(true);
+        System.err.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        System.err.println(time);       
+    }
 }

@@ -26,6 +26,10 @@ public final class SIMUS {
     public String getLog(){
         return this.log;
     }
+    
+    public boolean getIsSuccess(){
+        return this.isCorrect;
+    }
 
     /**
      * SIMUS method

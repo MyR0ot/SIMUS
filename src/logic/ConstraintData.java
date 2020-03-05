@@ -11,12 +11,12 @@ package logic;
  */
 public class ConstraintData {
     
-    private final int criteriaCount;
-    private final int alternativeCount;
-    private final double minRHSValue;
-    private final double maxRHSValue;
-    private final double minIDMValue;
-    private final double maxIDMValue;    
+    private final int criteriaCount;    // кол-во критериев
+    private final int alternativeCount; // кол-во альтернатив
+    private final double minRHSValue;   // минимальное значение для элементов RHS
+    private final double maxRHSValue;   // максимальное значение для элементов RHS
+    private final double minIDMValue;   // минимальное значение для элементов IDM
+    private final double maxIDMValue;   // максимальное значение для элементов IDM 
     
     public ConstraintData(int n, int m, double minIDMValue, double maxIDMValue, double minRHSValue, double maxRHSValue){
         this.criteriaCount = n;
