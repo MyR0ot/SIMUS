@@ -29,6 +29,12 @@ public class InputData {
     	return this.idm.length;
     }
     
+    public InputData() {
+    	this.idm = null;
+    	this.rhs = null;
+    	this.rhsSigns = null;
+    	this.actions = null;
+    }
     
     public InputData(InputData data) {
     	this.idm = Arrays.copyOf(data.idm, data.idm.length);
