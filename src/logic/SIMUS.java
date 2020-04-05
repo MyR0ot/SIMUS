@@ -1,8 +1,7 @@
 package logic;
 
 import it.ssc.pl.milp.*;
-import it.ssc.pl.milp.util.*;
-import it.ssc.log.SscLogger;
+import it.ssc.pl.milp.util.LPThreadsNumber;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -15,6 +14,10 @@ public final class SIMUS {
     private final int criterionCount;
     private final int alternativeCount;
     private final double[][] erm; // normalized efficient result matrix
+    private final double[] pf; // participation factor
+    private final double[] sc; // sum of column
+    private final Rank[] ranks; // result ranks for each alternative
+    
     private String log = "";
     private String errorLog = "";
     private Boolean isCorrect = true;
@@ -23,12 +26,17 @@ public final class SIMUS {
         return this.erm;
     }
     
+    
     public String getLog(){
         return this.log;
     }
     
     public boolean getIsSuccess(){
         return this.isCorrect;
+    }
+    
+    public Rank[] getRanks() {
+    	return this.ranks;
     }
 
     /**
@@ -44,6 +52,10 @@ public final class SIMUS {
         criterionCount = data.idm.length;
         alternativeCount = data.idm[0].length;
         erm = new double[criterionCount][alternativeCount];
+        
+        pf = new double[alternativeCount];
+        sc = new double[alternativeCount];
+        ranks = new Rank[alternativeCount];
 
         for (int i = 0; i < criterionCount; i++) {
             for (int j = 0; j < alternativeCount; j++) {
@@ -77,10 +89,47 @@ public final class SIMUS {
             }
         }
 
-        // normalize(erm); TODO: Добавить нормальизацию
+        normalize(erm);
+        calculateSC();
+        calculatePF();
+        calculateRanks();
+        
         
         appendToLog(this.toString(), false);
         return isCorrect;
+    }
+    
+    private void calculateSC() {
+    	for(int i = 0; i < alternativeCount; i++) {
+    		sc[i] = 0;
+    		for(int j = 0; j < criterionCount; j++) {
+        		sc[i] += erm[j][i];
+        	}
+    	}
+    }
+    
+    private void calculatePF() {
+    	for(int i = 0; i < alternativeCount; i++) {
+    		pf[i] = 0;
+    		for(int j = 0; j < criterionCount; j++) {
+        		if(erm[j][i] != 0)
+        			pf[i]++;
+        	}
+    	}
+    	
+    	normalize(pf);
+    }
+ 
+    public void calculateRanks() {
+    	for(int i = 0; i<alternativeCount; i++) {
+    		int countEqual = 0;
+    		int countGreat = 0;
+    		for(int j = 0; j < alternativeCount; j++) {
+    			if(sc[i]*pf[i] < sc[j]*pf[j]) countGreat++;
+    			if(sc[i]*pf[i] == sc[j]*pf[j]) countEqual++;
+    		}
+    		ranks[i] = new Rank(countGreat, countGreat + countEqual - 1);
+    	}
     }
     
     private void appendToLog(String str, Boolean isErrorLog){
@@ -150,7 +199,30 @@ public final class SIMUS {
                 matrix[row][column] /= tmpSum;
         }
     }
-
+    
+    public static void normalize(double[] array) {
+    	double tmpSum = 0;
+        for (int i = 0; i < array.length; i++)
+            tmpSum += array[i];
+        
+        if (tmpSum == 0) return;
+        
+        for (int i = 0; i < array.length; i++)
+            array[i] /= tmpSum;
+    }
+    
+    @Deprecated
+    private void showErm() {
+    	System.out.println("ERM:");
+    	for(int i = 0; i< this.erm.length; i++) {
+    		for(int j = 0; j< this.erm[i].length; j++)
+    			System.out.print(this.erm[i][j] + " ");
+    		System.out.println();
+    	}
+    }
+    
+    
+    
     public static Solution SIMPLEX(double[][] A,
             double[] c,
             double[] b,
@@ -192,52 +264,53 @@ public final class SIMUS {
 
     @Override
     public String toString() {
+        StringBuilder builder = new StringBuilder();
         String res = "";
         if(!errorLog.isEmpty()){
-            res += "ERRORS:\n";
-            res += errorLog;
+            builder.append("ERRORS:\n");
+            builder.append(errorLog);
         }
-        res += "\nIDM:\n";
+        builder.append("\nIDM:\n");
         for (int i = 0; i < criterionCount; i++) {
             for (int j = 0; j < alternativeCount; j++) {
-                res += (this.idm[i][j] + "\t");
+                builder.append(this.idm[i][j]).append("\t");
             }
             switch (this.rhsSigns[i]) {
                 case LE:
-                    res += "<= ";
+                    builder.append("<= ");
                     break;
                 case GE:
-                    res += ">= ";
+                    builder.append(">= ");
                     break;
                 case LOWER:
-                    res += "< ";
+                    builder.append("< ");
                     break;
                 case UPPER:
-                    res += "> ";
+                    builder.append("> ");
                     break;
                 case EQ:
-                    res += "= ";
+                    builder.append("= ");
                     break;
                 default:
-                    res += "? ";
+                    builder.append("? ");
                     break;
             }
-            res += (this.rhs[i]);
-            res += "\t";
-            res += (this.goalTypes[i].toString());
-            res += "\n";
+            builder.append(this.rhs[i]);
+            builder.append("\t");
+            builder.append(this.goalTypes[i].toString());
+            builder.append("\n");
         }
-        res += "\nERM:\n";
+        builder.append("\nERM:\n");
 
         for (int i = 0; i < this.erm.length; i++) {
             for (int j = 0; j < this.erm[i].length; j++) {
-                res += round(this.erm[i][j], 4) + "\t";
+                builder.append(round(this.erm[i][j], 4)).append("\t");
             }
-            res += "\n";
+            builder.append("\n");
         }
-        res += "\n";
+        builder.append("\n");
 
-        return res;
+        return builder.toString();
     }
 
     private static double round(double number, int scale) {
