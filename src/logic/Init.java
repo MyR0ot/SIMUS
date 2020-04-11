@@ -2,6 +2,8 @@ package logic;
 
 import it.ssc.pl.milp.ConsType;
 import it.ssc.pl.milp.GoalType;
+
+import javax.swing.*;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -19,15 +21,21 @@ public class Init {
     public static int successCount = 0;
     
     public static void main(String args[]) throws IOException{
-    	InputData data = generateRndData(new ConstraintData(4, 5, 0, 100, 5000, 70000), 2);
-        SIMUS simus = new SIMUS(data);
-        boolean res = simus.runLogic();
-        System.out.println(res);
-        Rank[]  ranks = simus.getRanks();
-        
-        for(int i  = 0; i < ranks.length; i++) {
-        	System.out.println(ranks[i].minRank + "-" + ranks[i].maxRank);
-        }
+
+        MainForm w = new MainForm();
+
+        w.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        w.setVisible(true);
+        return;
+//    	InputData data = generateRndData(new ConstraintData(4, 5, 0, 100, 5000, 70000), 2);
+//        SIMUS simus = new SIMUS(data);
+//        boolean res = simus.runLogic();
+//        System.out.println(res);
+//        Rank[]  ranks = simus.getRanks();
+//
+//        for(int i  = 0; i < ranks.length; i++) {
+//        	System.out.println(ranks[i].minRank + "-" + ranks[i].maxRank);
+//        }
         
     }  
      
@@ -126,7 +134,7 @@ public class Init {
         }
     }
 
-     private static InputData generateRndData(ConstraintData constraint, int precision){
+     public static InputData generateRndData(ConstraintData constraint, int precision){
          InputData res = new InputData();
          res.idm = new double[constraint.getCriterionCount()][constraint.getAlternativeCount()];
          res.rhs = new double[constraint.getCriterionCount()];
