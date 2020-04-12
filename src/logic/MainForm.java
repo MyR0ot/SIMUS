@@ -22,6 +22,7 @@ public class MainForm extends JFrame {
     private JScrollPane scrollPan1;
     private JButton button2;
     private JButton button3;
+    private JButton button4;
 
     private InputData inputData;
 
@@ -42,7 +43,11 @@ public class MainForm extends JFrame {
                 // start of code for horizontal headers
                 ListModel lm = new AbstractListModel() {
                     String headers[] = {"a", "b", "c", "d", "e", "f", "g", "h", "i"};
-                    public int getSize() { return headers.length; }
+
+                    public int getSize() {
+                        return headers.length;
+                    }
+
                     public Object getElementAt(int index) {
                         return headers[index];
                     }
@@ -68,15 +73,29 @@ public class MainForm extends JFrame {
                 SIMUS simus = new SIMUS(inputData);
                 boolean res = simus.runLogic();
                 System.out.println(res);
-                Rank[]  ranks = simus.getRanks();
+                Rank[] ranks = simus.getRanks();
 
                 StringBuilder stringRanks = new StringBuilder();
-               for(int i  = 0; i < ranks.length; i++) {
-               	System.out.println(ranks[i].minRank + "-" + ranks[i].maxRank);
-               	stringRanks.append(ranks[i].minRank).append("-").append(ranks[i].maxRank).append('\n');
-               }
+                for (int i = 0; i < ranks.length; i++) {
+                    System.out.println(ranks[i].minRank + "-" + ranks[i].maxRank);
+                    stringRanks.append(ranks[i].minRank).append("-").append(ranks[i].maxRank).append('\n');
+                }
 
                 JOptionPane.showMessageDialog(MainForm.this, stringRanks);
+            }
+        });
+
+        button4.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                // TODO: получить iosaConstraint
+                IOSAConstraint iosaConstraint = new IOSAConstraint(null, null, null, null); // TODO: передать 2 idm, 2 rhs;
+                IOSAResult iosaResult = SIMUS.runIOSA(inputData, iosaConstraint, 5000, 500);
+                if(iosaResult.getIsSuccess()){
+                    // TODO: отобразить результат
+                } else {
+                    // TODO: Сообщить юзеру, что успех метода на рандомных данных < 500/5000
+                }
             }
         });
     }
@@ -97,8 +116,8 @@ public class MainForm extends JFrame {
             setFont(header.getFont());
         }
 
-        public Component getListCellRendererComponent( JList list,
-                                                       Object value, int index, boolean isSelected, boolean cellHasFocus) {
+        public Component getListCellRendererComponent(JList list,
+                                                      Object value, int index, boolean isSelected, boolean cellHasFocus) {
             setText((value == null) ? "" : value.toString());
             return this;
         }
@@ -110,7 +129,7 @@ public class MainForm extends JFrame {
         private Set<TableModelListener> listeners = new HashSet<TableModelListener>();
         private InputData inputData;
 
-        public  InputDataTableModel(InputData inputData) {
+        public InputDataTableModel(InputData inputData) {
             this.inputData = inputData;
         }
 
@@ -133,7 +152,7 @@ public class MainForm extends JFrame {
             else if (columnIndex == inputData.alternativeCount() + 2)
                 return "action";
             else
-                return "Alternative " + (char)('A' + columnIndex);
+                return "Alternative " + (char) ('A' + columnIndex);
 
         }
 
@@ -173,7 +192,7 @@ public class MainForm extends JFrame {
             else if (columnIndex == inputData.alternativeCount() + 1)
                 inputData.rhs[rowIndex] = Double.parseDouble(o.toString());
             else if (columnIndex == inputData.alternativeCount() + 2)
-                inputData.actions[rowIndex] = (GoalType)o;
+                inputData.actions[rowIndex] = (GoalType) o;
             else
                 inputData.idm[rowIndex][columnIndex] = Double.parseDouble(o.toString());
         }

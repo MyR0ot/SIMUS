@@ -2,6 +2,7 @@ package logic;
 
 import it.ssc.pl.milp.*;
 import it.ssc.pl.milp.util.LPThreadsNumber;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -17,7 +18,7 @@ public final class SIMUS {
     private final double[] pf; // participation factor
     private final double[] sc; // sum of column
     private final Rank[] ranks; // result ranks for each alternative
-    
+
     private String log = "";
     private String errorLog = "";
     private Boolean isCorrect = true;
@@ -25,22 +26,23 @@ public final class SIMUS {
     public double[][] getERM() {
         return this.erm;
     }
-    
-    
-    public String getLog(){
+
+
+    public String getLog() {
         return this.log;
     }
-    
-    public boolean getIsSuccess(){
+
+    public boolean getIsSuccess() {
         return this.isCorrect;
     }
-    
+
     public Rank[] getRanks() {
-    	return this.ranks;
+        return this.ranks;
     }
 
     /**
      * SIMUS method
+     *
      * @param data
      */
     public SIMUS(InputData data) {
@@ -52,7 +54,7 @@ public final class SIMUS {
         criterionCount = data.idm.length;
         alternativeCount = data.idm[0].length;
         erm = new double[criterionCount][alternativeCount];
-        
+
         pf = new double[alternativeCount];
         sc = new double[alternativeCount];
         ranks = new Rank[alternativeCount];
@@ -63,8 +65,8 @@ public final class SIMUS {
             }
         }
     }
-    
-    public Boolean runLogic(){
+
+    public Boolean runLogic() {
         for (int i = 0; i < criterionCount; i++) {
             try {
                 Solution solution = SIMPLEX(removeCriterionFromIDM(i), // A
@@ -74,10 +76,9 @@ public final class SIMUS {
                         goalTypes[i]
                 );
 
-                // printSolution(solution); // TODO: kill this     
                 if (solution == null) {
-                    appendToLog("creterion#" + (i+1) + ": SOLUTION IS NULL!\n", true);
-                } else{
+                    appendToLog("creterion#" + (i + 1) + ": SOLUTION IS NULL!\n", true);
+                } else {
                     erm[i] = transformToERMString(solution);
                 }
             } catch (LPException ex) {
@@ -93,54 +94,53 @@ public final class SIMUS {
         calculateSC();
         calculatePF();
         calculateRanks();
-        
-        
+
+
         appendToLog(this.toString(), false);
         return isCorrect;
     }
-    
+
     private void calculateSC() {
-    	for(int i = 0; i < alternativeCount; i++) {
-    		sc[i] = 0;
-    		for(int j = 0; j < criterionCount; j++) {
-        		sc[i] += erm[j][i];
-        	}
-    	}
+        for (int i = 0; i < alternativeCount; i++) {
+            sc[i] = 0;
+            for (int j = 0; j < criterionCount; j++) {
+                sc[i] += erm[j][i];
+            }
+        }
     }
-    
+
     private void calculatePF() {
-    	for(int i = 0; i < alternativeCount; i++) {
-    		pf[i] = 0;
-    		for(int j = 0; j < criterionCount; j++) {
-        		if(erm[j][i] != 0)
-        			pf[i]++;
-        	}
-    	}
-    	
-    	normalize(pf);
+        for (int i = 0; i < alternativeCount; i++) {
+            pf[i] = 0;
+            for (int j = 0; j < criterionCount; j++) {
+                if (erm[j][i] != 0)
+                    pf[i]++;
+            }
+        }
+
+        normalize(pf);
     }
- 
+
     public void calculateRanks() {
-    	for(int i = 0; i<alternativeCount; i++) {
-    		int countEqual = 0;
-    		int countGreat = 0;
-    		for(int j = 0; j < alternativeCount; j++) {
-    			if(sc[i]*pf[i] < sc[j]*pf[j]) countGreat++;
-    			if(sc[i]*pf[i] == sc[j]*pf[j]) countEqual++;
-    		}
-    		ranks[i] = new Rank(countGreat, countGreat + countEqual - 1);
-    	}
+        for (int i = 0; i < alternativeCount; i++) {
+            int countEqual = 0;
+            int countGreat = 0;
+            for (int j = 0; j < alternativeCount; j++) {
+                if (sc[i] * pf[i] < sc[j] * pf[j]) countGreat++;
+                if (sc[i] * pf[i] == sc[j] * pf[j]) countEqual++;
+            }
+            ranks[i] = new Rank(countGreat, countGreat + countEqual - 1);
+        }
     }
-    
-    private void appendToLog(String str, Boolean isErrorLog){
-        if(isErrorLog){
+
+    private void appendToLog(String str, Boolean isErrorLog) {
+        if (isErrorLog) {
             errorLog += str;
             isCorrect = false;
-        }
-        else log += str;
-        
+        } else log += str;
+
     }
-    
+
     public static double[] transformToERMString(Solution solution) {
         Variable[] variables = solution.getVariables();
         double[] res = new double[variables.length];
@@ -185,7 +185,7 @@ public final class SIMUS {
 
         return res;
     }
-    
+
     public static void normalize(double[][] matrix) {
         for (int row = 0; row < matrix.length; row++) {
             double tmpSum = 0;
@@ -199,50 +199,49 @@ public final class SIMUS {
                 matrix[row][column] /= tmpSum;
         }
     }
-    
+
     public static void normalize(double[] array) {
-    	double tmpSum = 0;
+        double tmpSum = 0;
         for (int i = 0; i < array.length; i++)
             tmpSum += array[i];
-        
+
         if (tmpSum == 0) return;
-        
+
         for (int i = 0; i < array.length; i++)
             array[i] /= tmpSum;
     }
-    
+
     @Deprecated
     private void showErm() {
-    	System.out.println("ERM:");
-    	for(int i = 0; i< this.erm.length; i++) {
-    		for(int j = 0; j< this.erm[i].length; j++)
-    			System.out.print(this.erm[i][j] + " ");
-    		System.out.println();
-    	}
+        System.out.println("ERM:");
+        for (int i = 0; i < this.erm.length; i++) {
+            for (int j = 0; j < this.erm[i].length; j++)
+                System.out.print(this.erm[i][j] + " ");
+            System.out.println();
+        }
     }
-    
-    
-    
-    public static Solution SIMPLEX(double[][] A,
-            double[] c,
-            double[] b,
-            ConsType[] rel,
-            GoalType goalType
+
+
+    private static Solution SIMPLEX(double[][] A,
+                                    double[] c,
+                                    double[] b,
+                                    ConsType[] rel,
+                                    GoalType goalType
     ) throws SimplexException, LPException {
 
         LinearObjectiveFunction objectiveFunction = new LinearObjectiveFunction(c, goalType);
-        ArrayList< Constraint> constraints = new ArrayList<>();
+        ArrayList<Constraint> constraints = new ArrayList<>();
         for (int i = 0; i < A.length; i++) {
             constraints.add(new Constraint(A[i], rel[i], b[i]));
         }
         try {
             LP lp = new LP(objectiveFunction, constraints); // вот здесь FAIL
             SolutionType solutionType = lp.resolve();
-            // lp.setThreadsNumber(LPThreadsNumber.N_4);
+            lp.setThreadsNumber(LPThreadsNumber.N_4);
             return solutionType == SolutionType.OPTIMUM ? lp.getSolution() : null;
         } catch (Exception e) {
         }
-        
+
         return null;
     }
 
@@ -253,10 +252,10 @@ public final class SIMUS {
         }
         System.out.println();
     }
-    
+
     @Deprecated
-    public static void printConstraints(ArrayList< Constraint> constraints) {
-        for(int i = 0; i< constraints.size(); i++){
+    public static void printConstraints(ArrayList<Constraint> constraints) {
+        for (int i = 0; i < constraints.size(); i++) {
             System.out.print(constraints.get(i).getRhs() + " ");
         }
         System.out.println();
@@ -266,7 +265,7 @@ public final class SIMUS {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         String res = "";
-        if(!errorLog.isEmpty()){
+        if (!errorLog.isEmpty()) {
             builder.append("ERRORS:\n");
             builder.append(errorLog);
         }
@@ -320,5 +319,49 @@ public final class SIMUS {
         }
         double tmp = number * pow;
         return (double) (int) ((tmp - (int) tmp) >= 0.5 ? tmp + 1 : tmp) / pow;
+    }
+
+
+    public static IOSAResult runIOSA(InputData inputData, IOSAConstraint iosaConstraint) {
+        return runIOSA(inputData, iosaConstraint, 5000, 500);
+    }
+
+    public static IOSAResult runIOSA(InputData inputData, IOSAConstraint iosaConstraint, int testCount, int successCountMin) {
+        int successCount = 0;
+
+        double[][] pMatrix = new double[inputData.alternativeCount()][inputData.alternativeCount()];
+        for (int i = 0; i < pMatrix.length; i++)
+            for (int j = 0; j < pMatrix[0].length; j++)
+                pMatrix[i][j] = 0;
+
+
+        for (int i = 0; i < testCount; i++) {
+            generateNextData(inputData, iosaConstraint);
+            SIMUS simus = new SIMUS(inputData);
+            if (simus.runLogic()) {
+                successCount++;
+                for(int r = 0; r < simus.ranks.length; i++){
+                    double incValue = 1.0 / (simus.ranks[r].maxRank - simus.ranks[r].minRank + 1);
+                    for(int curRank = simus.ranks[r].minRank; curRank <= simus.ranks[r].maxRank; curRank++)
+                        pMatrix[r][curRank] += incValue;
+                }
+            }
+        }
+
+        normalize(pMatrix);
+        if(successCount < successCountMin)
+            return new IOSAResult(false, testCount, successCount, pMatrix);
+        else
+            return new IOSAResult(true, testCount, successCount, pMatrix);
+    }
+
+    private static void generateNextData(InputData inputData, IOSAConstraint iosaConstraint) {
+        for (int i = 0; i < inputData.rhs.length; i++) {
+            inputData.rhs[i] = iosaConstraint.minRhs[i] + Math.random() * (iosaConstraint.maxRhs[i] - iosaConstraint.minRhs[i]);
+        }
+
+        for (int i = 0; i < inputData.idm.length; i++)
+            for (int j = 0; j < inputData.idm[0].length; j++)
+                inputData.idm[i][j] = iosaConstraint.minIdm[i][j] + Math.random() * (iosaConstraint.maxIdm[i][j] - iosaConstraint.minIdm[i][j]);
     }
 }
