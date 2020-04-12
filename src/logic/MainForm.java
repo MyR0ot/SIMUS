@@ -22,8 +22,12 @@ public class MainForm extends JFrame {
     private JScrollPane scrollPan1;
     private JButton button2;
     private JButton button3;
+    private JSpinner spinner1;
+    private JSpinner spinner2;
 
     private InputData inputData;
+    private int maxCriteriaCount = 10;
+    private int maxAlternativeCount = 10;
 
     public MainForm() {
         setContentPane(panel1);
@@ -41,21 +45,23 @@ public class MainForm extends JFrame {
 
                 // start of code for horizontal headers
                 ListModel lm = new AbstractListModel() {
-                    String headers[] = {"a", "b", "c", "d", "e", "f", "g", "h", "i"};
-                    public int getSize() { return headers.length; }
+                    public int getSize() { return inputData.criteriaCount(); }
                     public Object getElementAt(int index) {
-                        return headers[index];
+                        return "C"+ index;
                     }
                 };
 
                 JList rowHeader = new JList(lm);
                 rowHeader.setFixedCellWidth(50);
                 rowHeader.setCellRenderer(new RowHeaderRenderer(table1));
+                rowHeader.setFixedCellHeight(table1.getRowHeight());
                 scrollPan1.setRowHeaderView(rowHeader);
                 // end of code for horizontal headers
 
+                int criteriaCount = (int)spinner1.getValue();
+                int alternativeCount = (int)spinner2.getValue();
 
-                inputData = Init.generateRndData(new ConstraintData(4, 5, 0, 100, 5000, 70000), 2);
+                inputData = Init.generateRndData(new ConstraintData(criteriaCount, alternativeCount, 0, 100, 5000, 70000), 2);
                 TableModel model = new InputDataTableModel(inputData);
                 table1.setModel(model);
 
@@ -133,7 +139,7 @@ public class MainForm extends JFrame {
             else if (columnIndex == inputData.alternativeCount() + 2)
                 return "action";
             else
-                return "Alternative " + (char)('A' + columnIndex);
+                return "A" + columnIndex;
 
         }
 
