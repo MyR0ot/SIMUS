@@ -300,10 +300,12 @@ public class Init {
     	 
     	 for(int i = 0; i<rndData.idm.length; i++)
     		 for(int j = 0; j<rndData.idm[i].length; j++) {
-    			 rndData.idm[i][j] = iosaConstraint.minValues[i] + Math.random() * (iosaConstraint.maxValues[i] - iosaConstraint.minValues[i]);
+    			 rndData.idm[i][j] = iosaConstraint.minIdm[i][j] + Math.random() * (iosaConstraint.maxIdm[i][j] - iosaConstraint.minIdm[i][j]);
     		 }
-    	 
-    	 
+
+    	 for(int i = 0; i<rndData.rhs.length; i++)
+    	     rndData.rhs[i] = iosaConstraint.minRhs[i] + Math.random() * (iosaConstraint.maxRhs[i] - iosaConstraint.minRhs[i]);
+
     	 return rndData;
      }
 }
