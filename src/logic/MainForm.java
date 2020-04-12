@@ -71,9 +71,8 @@ public class MainForm extends JFrame {
                 TableModel model = new InputDataTableModel(inputData);
                 table1.setModel(model);
 
-                JComboBox b = new JComboBox(new String[] {">","<",">=","<=","="});
-
-                table1.getColumnModel().getColumn(inputData.alternativeCount() ).setCellEditor(new DefaultCellEditor(b));
+                table1.getColumnModel().getColumn(inputData.alternativeCount() ).setCellEditor(new DefaultCellEditor(new JComboBox(new String[] {">","<",">=","<=","="})));
+                table1.getColumnModel().getColumn(inputData.alternativeCount() +2).setCellEditor(new DefaultCellEditor(new JComboBox(new String[] {"MAX","MIN"})));
 
                 System.out.println("generate");
             }
@@ -84,15 +83,21 @@ public class MainForm extends JFrame {
                 SIMUS simus = new SIMUS(inputData);
                 boolean res = simus.runLogic();
                 System.out.println(res);
-                Rank[] ranks = simus.getRanks();
+                if (res)
+                {
+                    Rank[] ranks = simus.getRanks();
 
-                StringBuilder stringRanks = new StringBuilder();
-                for (int i = 0; i < ranks.length; i++) {
-                    System.out.println(ranks[i].minRank + "-" + ranks[i].maxRank);
-                    stringRanks.append(ranks[i].minRank).append("-").append(ranks[i].maxRank).append('\n');
+                    StringBuilder stringRanks = new StringBuilder();
+                    for (int i = 0; i < ranks.length; i++) {
+                        System.out.println(ranks[i].minRank + "-" + ranks[i].maxRank);
+                        stringRanks.append(ranks[i].minRank).append("-").append(ranks[i].maxRank).append('\n');
+                    }
+
+                    JOptionPane.showMessageDialog(MainForm.this, stringRanks);
                 }
+                else
+                    JOptionPane.showMessageDialog(MainForm.this, "Solution not exist");
 
-                JOptionPane.showMessageDialog(MainForm.this, stringRanks);
             }
         });
 
@@ -262,8 +267,14 @@ public class MainForm extends JFrame {
                 inputData.rhsSigns[rowIndex] = strToConsType((String)o);
             else if (columnIndex == inputData.alternativeCount() + 1)
                 inputData.rhs[rowIndex] = Double.parseDouble(o.toString());
-            else if (columnIndex == inputData.alternativeCount() + 2)
-                inputData.actions[rowIndex] = (GoalType) o;
+            else if (columnIndex == inputData.alternativeCount() + 2) {
+                if (GoalType.valueOf(((String)o).toUpperCase()) == GoalType.MAX)
+                    inputData.actions[rowIndex] = GoalType.MAX;
+                else if (GoalType.valueOf(((String)o).toUpperCase()) == GoalType.MIN)
+                    inputData.actions[rowIndex] = GoalType.MIN;
+                else
+                    throw new NullPointerException();
+            }
             else
                 inputData.idm[rowIndex][columnIndex] = Double.parseDouble(o.toString());
         }
