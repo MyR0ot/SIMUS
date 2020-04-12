@@ -46,10 +46,13 @@ public final class SIMUS {
      * @param data
      */
     public SIMUS(InputData data) {
-        this.idm = Arrays.copyOf(data.idm, data.idm.length);
-        this.rhs = Arrays.copyOf(data.rhs, data.rhs.length);
-        this.rhsSigns = Arrays.copyOf(data.rhsSigns, data.rhsSigns.length);
-        this.goalTypes = Arrays.copyOf(data.actions, data.actions.length);
+        this.idm = data.idm.clone();
+        for(int  i = 0; i<data.idm.length; i++)
+            this.idm[i] = data.idm[i].clone();
+
+        this.rhs = data.rhs.clone();
+        this.rhsSigns = data.rhsSigns.clone();
+        this.goalTypes = data.actions.clone();
 
         criterionCount = data.idm.length;
         alternativeCount = data.idm[0].length;
@@ -340,7 +343,7 @@ public final class SIMUS {
             SIMUS simus = new SIMUS(inputData);
             if (simus.runLogic()) {
                 successCount++;
-                for(int r = 0; r < simus.ranks.length; i++){
+                for(int r = 0; r < simus.ranks.length; r++){
                     double incValue = 1.0 / (simus.ranks[r].maxRank - simus.ranks[r].minRank + 1);
                     for(int curRank = simus.ranks[r].minRank; curRank <= simus.ranks[r].maxRank; curRank++)
                         pMatrix[r][curRank] += incValue;

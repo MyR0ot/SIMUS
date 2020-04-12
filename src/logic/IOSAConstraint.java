@@ -10,9 +10,16 @@ public class IOSAConstraint {
 	public double[] maxRhs;
 	
 	public IOSAConstraint(double[][] minIdm, double[][] maxIdm, double[] minRhs, double[] maxRhs) {
-		this.minIdm = Arrays.copyOf(minIdm, minIdm.length);
-		this.maxIdm = Arrays.copyOf(maxIdm, maxIdm.length);
-		this.minRhs = Arrays.copyOf(minRhs, minRhs.length);
-		this.maxRhs = Arrays.copyOf(minRhs, maxRhs.length);
+		this.minIdm = minIdm.clone();
+		for(int i = 0; i<minIdm.length; i++)
+			this.minIdm[i] = minIdm[i].clone();
+
+		this.maxIdm = maxIdm.clone();
+		for(int i = 0; i<maxIdm.length; i++)
+			this.maxIdm[i] = maxIdm[i].clone();
+
+
+		this.minRhs = minRhs.clone();
+		this.maxRhs = maxRhs.clone();
 	}
 }

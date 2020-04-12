@@ -37,10 +37,13 @@ public class InputData {
     }
     
     public InputData(InputData data) {
-    	this.idm = Arrays.copyOf(data.idm, data.idm.length);
-        this.rhs = Arrays.copyOf(data.rhs, data.rhs.length);
-        this.rhsSigns = Arrays.copyOf(data.rhsSigns, data.rhsSigns.length);
-        this.actions = Arrays.copyOf(data.actions, data.actions.length);
+    	this.idm = data.idm.clone();
+        for(int i = 0; i<data.idm.length; i++)
+            this.idm[i] = data.idm[i].clone();
+
+        this.rhs = data.rhs.clone();
+        this.rhsSigns = data.rhsSigns.clone();
+        this.actions = data.actions.clone();
     }
     
     public InputData copy() {

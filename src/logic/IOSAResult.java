@@ -31,4 +31,14 @@ final class IOSAResult {
     public Boolean getIsSuccess(){
         return isSuccess;
     }
+
+    @Deprecated
+    public void printPMatrix(){
+        System.err.println("----------------- P MATRIX -----------------P_MATRIX:");
+        for(int i = 0; i<pMatrix.length; i++){
+            for(int j = 0; j< pMatrix[i].length; j++)
+                System.err.print(pMatrix[i][j] + " ");
+            System.err.println();
+        }
+    }
 }

@@ -88,11 +88,20 @@ public class MainForm extends JFrame {
         button4.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
+
                 // TODO: получить iosaConstraint
-                IOSAConstraint iosaConstraint = new IOSAConstraint(null, null, null, null); // TODO: передать 2 idm, 2 rhs;
-                IOSAResult iosaResult = SIMUS.runIOSA(inputData, iosaConstraint, 5000, 500);
+                IOSAConstraint iosaConstraint = new IOSAConstraint(
+                        multIDM(inputData.idm, 0.95),
+                        multIDM(inputData.idm, 1.05),
+                        inputData.rhs,
+                        inputData.rhs); // TODO: передать 2 idm, 2 rhs;
+
+                IOSAResult iosaResult = SIMUS.runIOSA(inputData, iosaConstraint, 20, 0); // TODO: настроить testCount, successCountMin
+                System.err.println("successCount = " + iosaResult.getSuccessCount());
                 if(iosaResult.getIsSuccess()){
                     // TODO: отобразить результат
+                    iosaResult.printPMatrix();
+
                 } else {
                     // TODO: Сообщить юзеру, что успех метода на рандомных данных < 500/5000
                 }
@@ -102,6 +111,20 @@ public class MainForm extends JFrame {
 
     public static void main(String[] args) {
         new MainForm();
+    }
+
+    @Deprecated
+    public static double[][] multIDM(double[][] idm, double kef){
+        double[][] res = idm.clone();
+        for (int i = 0; i < idm.length; i++) {
+            res[i] = idm[i].clone();
+        }
+
+        for(int i = 0; i < res.length; i++)
+            for(int j = 0; j< res[i].length; j++)
+                res[i][j]*=kef;
+
+        return res;
     }
 
     class RowHeaderRenderer extends JLabel implements ListCellRenderer {
