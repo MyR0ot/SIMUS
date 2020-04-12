@@ -47,8 +47,8 @@ public class MainForm extends JFrame {
         setTitle("SIMUS standalone");
         setVisible(true);
 
-        spinner1.setValue(3);
-        spinner2.setValue(5);
+        spinner1.setValue(4);
+        spinner2.setValue(6);
 
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         button1.addActionListener(new ActionListener() {
