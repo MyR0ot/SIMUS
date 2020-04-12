@@ -2,17 +2,24 @@ package logic;
 
 import it.ssc.pl.milp.ConsType;
 import it.ssc.pl.milp.GoalType;
+import org.knowm.xchart.*;
+import org.knowm.xchart.style.PieStyler;
+import org.knowm.xchart.style.Styler;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableModel;
 import java.awt.*;
-import java.awt.dnd.DropTarget;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashSet;
+import java.util.Observable;
 import java.util.Set;
+
 
 public class MainForm extends JFrame {
 
@@ -40,6 +47,9 @@ public class MainForm extends JFrame {
         setTitle("SIMUS standalone");
         setVisible(true);
 
+        spinner1.setValue(3);
+        spinner2.setValue(5);
+
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         button1.addActionListener(new ActionListener() {
             @Override
@@ -47,12 +57,12 @@ public class MainForm extends JFrame {
 
                 // start of code for horizontal headers
                 ListModel lm = new AbstractListModel() {
-                    String headers[] = {"a", "b", "c", "d", "e", "f", "g", "h", "i"};
-
-                    public int getSize() { return inputData.criteriaCount(); }
+                    public int getSize() {
+                        return inputData.criteriaCount();
+                    }
 
                     public Object getElementAt(int index) {
-                        return "C-"+ index;
+                        return "C-" + index;
                     }
                 };
 
@@ -63,17 +73,17 @@ public class MainForm extends JFrame {
                 scrollPan1.setRowHeaderView(rowHeader);
                 // end of code for horizontal headers
 
-                int criteriaCount = (int)spinner1.getValue();
-                int alternativeCount = (int)spinner2.getValue();
+                int criteriaCount = (int) spinner1.getValue();
+                int alternativeCount = (int) spinner2.getValue();
 
 
-                inputData = Init.generateRndData(new ConstraintData(criteriaCount, alternativeCount, 0, 100, 5000, 14000*alternativeCount), 2);
+                inputData = Init.generateRndData(new ConstraintData(criteriaCount, alternativeCount, 0, 100, 5000, 14000 * alternativeCount), 2);
                 TableModel model = new InputDataTableModel(inputData);
                 table1.setModel(model);
 
-                JComboBox b = new JComboBox(new String[] {">","<",">=","<=","="});
+                JComboBox b = new JComboBox(new String[]{">", "<", ">=", "<=", "="});
 
-                table1.getColumnModel().getColumn(inputData.alternativeCount() ).setCellEditor(new DefaultCellEditor(b));
+                table1.getColumnModel().getColumn(inputData.alternativeCount()).setCellEditor(new DefaultCellEditor(b));
 
                 System.out.println("generate");
             }
@@ -95,7 +105,6 @@ public class MainForm extends JFrame {
                 JOptionPane.showMessageDialog(MainForm.this, stringRanks);
             }
         });
-
         button4.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -108,11 +117,10 @@ public class MainForm extends JFrame {
                         inputData.rhs); // TODO: передать 2 idm, 2 rhs;
 
                 IOSAResult iosaResult = SIMUS.runIOSA(inputData, iosaConstraint, 20, 0); // TODO: настроить testCount, successCountMin
-                System.err.println("successCount = " + iosaResult.getSuccessCount());
-                if(iosaResult.getIsSuccess()){
-                    // TODO: отобразить результат
+                System.err.println("successCount = " + iosaResult.getSuccessCount()); // TODO: kill this
+                if (iosaResult.getIsSuccess()) {
                     iosaResult.printPMatrix();
-
+                    showPieChart(iosaResult, 0);
                 } else {
                     // TODO: Сообщить юзеру, что успех метода на рандомных данных < 500/5000
                 }
@@ -124,16 +132,94 @@ public class MainForm extends JFrame {
         new MainForm();
     }
 
+
+    private PieChart createChart(IOSAResult iosaResult, int rank){
+        PieChart chart = new PieChartBuilder().width(800).height(600).title("rank: " + (rank + 1)).theme(Styler.ChartTheme.GGPlot2).build();
+
+        // Customize Chart
+        chart.getStyler().setLegendVisible(false);
+        chart.getStyler().setAnnotationType(PieStyler.AnnotationType.LabelAndPercentage);
+        chart.getStyler().setAnnotationDistance(1.15);
+        chart.getStyler().setPlotContentSize(.7);
+        chart.getStyler().setStartAngleInDegrees(0);
+
+        // Series
+        for (int i = 0; i < iosaResult.getPMatrix().length; i++) {
+            if (iosaResult.getPMatrix()[i][rank] >= 0.01)
+                chart.addSeries("A-" +  (i+1), iosaResult.getPMatrix()[i][rank]);
+        }
+        return chart;
+    }
+
+    public void showPieChart(IOSAResult iosaResult, int rank) {
+        iosaResult.printPMatrix();
+
+        final PieChart chart = createChart(iosaResult, rank);
+
+
+        // Create and set up the window.
+        JFrame frame = new JFrame("IOSA");
+
+        JLabel jl_rank = new JLabel("rank: ");
+        JSpinner jsp_rank = new JSpinner();
+        jsp_rank.setValue(rank + 1);
+
+        JPanel infoPanel = new JPanel();
+        infoPanel.setSize(800, 100);
+        infoPanel.add(jl_rank);
+        infoPanel.add(jsp_rank);
+
+
+
+        // Определение менеджера расположения
+
+
+
+        // TODO:
+        frame.setLayout(new BorderLayout());
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+        // chart
+        JPanel chartPanel = new XChartPanel<PieChart>(chart);
+
+
+        frame.add(chartPanel, BorderLayout.CENTER);
+        frame.add(infoPanel, BorderLayout.NORTH);
+
+        jsp_rank.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                JSpinner spinner = (JSpinner) e.getSource();
+                int value = (int)spinner.getValue();
+                try{
+                    System.err.println(value);
+                    if(value >= 1 && value <= iosaResult.getPMatrix().length){
+                        frame.dispose();
+                        showPieChart(iosaResult, value - 1);
+                    } else{
+                        jsp_rank.setValue(1);
+                    }
+                } catch (Exception ex){
+                    // wtf
+                }
+            }
+        });
+
+        // Display the window.
+        frame.pack();
+        frame.setVisible(true);
+    }
+
     @Deprecated
-    public static double[][] multIDM(double[][] idm, double kef){
+    public static double[][] multIDM(double[][] idm, double kef) {
         double[][] res = idm.clone();
         for (int i = 0; i < idm.length; i++) {
             res[i] = idm[i].clone();
         }
 
-        for(int i = 0; i < res.length; i++)
-            for(int j = 0; j< res[i].length; j++)
-                res[i][j]*=kef;
+        for (int i = 0; i < res.length; i++)
+            for (int j = 0; j < res[i].length; j++)
+                res[i][j] *= kef;
 
         return res;
     }
@@ -157,9 +243,8 @@ public class MainForm extends JFrame {
         }
     }
 
-    private String consTypeToStr(ConsType type){
-        switch (type)
-        {
+    private String consTypeToStr(ConsType type) {
+        switch (type) {
             case LE:
                 return "<=";
             case GE:
@@ -176,9 +261,8 @@ public class MainForm extends JFrame {
 
     }
 
-    private ConsType strToConsType(String str){
-        switch (str)
-        {
+    private ConsType strToConsType(String str) {
+        switch (str) {
             case "<=":
                 return ConsType.LE;
             case ">=":
@@ -259,7 +343,7 @@ public class MainForm extends JFrame {
         @Override
         public void setValueAt(Object o, int rowIndex, int columnIndex) {
             if (columnIndex == inputData.alternativeCount())
-                inputData.rhsSigns[rowIndex] = strToConsType((String)o);
+                inputData.rhsSigns[rowIndex] = strToConsType((String) o);
             else if (columnIndex == inputData.alternativeCount() + 1)
                 inputData.rhs[rowIndex] = Double.parseDouble(o.toString());
             else if (columnIndex == inputData.alternativeCount() + 2)
