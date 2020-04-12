@@ -8,6 +8,7 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableModel;
 import java.awt.*;
+import java.awt.dnd.DropTarget;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashSet;
@@ -69,6 +70,10 @@ public class MainForm extends JFrame {
                 inputData = Init.generateRndData(new ConstraintData(criteriaCount, alternativeCount, 0, 100, 5000, 14000*alternativeCount), 2);
                 TableModel model = new InputDataTableModel(inputData);
                 table1.setModel(model);
+
+                JComboBox b = new JComboBox(new String[] {">","<",">=","<=","="});
+
+                table1.getColumnModel().getColumn(inputData.alternativeCount() ).setCellEditor(new DefaultCellEditor(b));
 
                 System.out.println("generate");
             }
@@ -152,6 +157,43 @@ public class MainForm extends JFrame {
         }
     }
 
+    private String consTypeToStr(ConsType type){
+        switch (type)
+        {
+            case LE:
+                return "<=";
+            case GE:
+                return ">=";
+            case LOWER:
+                return "<";
+            case UPPER:
+                return ">";
+            case EQ:
+                return "=";
+            default:
+                return null;
+        }
+
+    }
+
+    private ConsType strToConsType(String str){
+        switch (str)
+        {
+            case "<=":
+                return ConsType.LE;
+            case ">=":
+                return ConsType.GE;
+            case "<":
+                return ConsType.LOWER;
+            case ">":
+                return ConsType.UPPER;
+            case "=":
+                return ConsType.EQ;
+            default:
+                return null;
+        }
+
+    }
 
     public class InputDataTableModel implements TableModel {
 
@@ -205,7 +247,7 @@ public class MainForm extends JFrame {
         @Override
         public Object getValueAt(int rowIndex, int columnIndex) {
             if (columnIndex == inputData.alternativeCount()) //rhs sign
-                return inputData.rhsSigns[rowIndex].toString();
+                return consTypeToStr(inputData.rhsSigns[rowIndex]);
             else if (columnIndex == inputData.alternativeCount() + 1)
                 return inputData.rhs[rowIndex];
             else if (columnIndex == inputData.alternativeCount() + 2)
@@ -217,7 +259,7 @@ public class MainForm extends JFrame {
         @Override
         public void setValueAt(Object o, int rowIndex, int columnIndex) {
             if (columnIndex == inputData.alternativeCount())
-                inputData.rhsSigns[rowIndex] = (ConsType) o;
+                inputData.rhsSigns[rowIndex] = strToConsType((String)o);
             else if (columnIndex == inputData.alternativeCount() + 1)
                 inputData.rhs[rowIndex] = Double.parseDouble(o.toString());
             else if (columnIndex == inputData.alternativeCount() + 2)
