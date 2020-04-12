@@ -35,8 +35,8 @@ public class MainForm extends JFrame {
 
     private InputData inputData;
 
-    private int maxCriteriaCount = 10;
-    private int maxAlternativeCount = 10;
+    private int maxCriteriaCount = 7;
+    private int maxAlternativeCount = 15;
 
     public MainForm() {
         setContentPane(panel1);
@@ -47,62 +47,32 @@ public class MainForm extends JFrame {
         setTitle("SIMUS standalone");
         setVisible(true);
 
-        spinner1.setValue(4);
-        spinner2.setValue(6);
+        spinner1.setValue(7);
+        spinner2.setValue(12);
 
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         button1.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-
-                // start of code for horizontal headers
-                ListModel lm = new AbstractListModel() {
-                    public int getSize() {
-                        return inputData.criteriaCount();
-                    }
-
-                    public Object getElementAt(int index) {
-                        return "C-" + index;
-                    }
-                };
-
-                JList rowHeader = new JList(lm);
-                rowHeader.setFixedCellWidth(50);
-                rowHeader.setCellRenderer(new RowHeaderRenderer(table1));
-                rowHeader.setFixedCellHeight(table1.getRowHeight());
-                scrollPan1.setRowHeaderView(rowHeader);
-                // end of code for horizontal headers
-
-                int criteriaCount = (int) spinner1.getValue();
-                int alternativeCount = (int) spinner2.getValue();
-
-
-                inputData = Init.generateRndData(new ConstraintData(criteriaCount, alternativeCount, 0, 100, 5000, 14000 * alternativeCount), 2);
-                TableModel model = new InputDataTableModel(inputData);
-                table1.setModel(model);
-
-                JComboBox b = new JComboBox(new String[]{">", "<", ">=", "<=", "="});
-
-                table1.getColumnModel().getColumn(inputData.alternativeCount()).setCellEditor(new DefaultCellEditor(b));
-
-                System.out.println("generate");
+                reCreateTable();
             }
         });
         button2.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 SIMUS simus = new SIMUS(inputData);
-                boolean res = simus.runLogic();
-                System.out.println(res);
-                Rank[] ranks = simus.getRanks();
+                if(simus.runLogic()){
+                    Rank[] ranks = simus.getRanks();
 
-                StringBuilder stringRanks = new StringBuilder();
-                for (int i = 0; i < ranks.length; i++) {
-                    System.out.println(ranks[i].minRank + "-" + ranks[i].maxRank);
-                    stringRanks.append(ranks[i].minRank).append("-").append(ranks[i].maxRank).append('\n');
+                    StringBuilder stringRanks = new StringBuilder();
+                    for (int i = 0; i < ranks.length; i++) {
+                        System.out.println(ranks[i].minRank + "-" + ranks[i].maxRank);
+                        stringRanks.append(ranks[i].minRank).append("-").append(ranks[i].maxRank).append('\n');
+                    }
+                    JOptionPane.showMessageDialog(MainForm.this, stringRanks); // TODO: сделать другую визализацию
+                } else {
+                    JOptionPane.showMessageDialog(MainForm.this, "The solution is not found!");
                 }
-
-                JOptionPane.showMessageDialog(MainForm.this, stringRanks);
             }
         });
         button4.addActionListener(new ActionListener() {
@@ -116,25 +86,59 @@ public class MainForm extends JFrame {
                         inputData.rhs,
                         inputData.rhs); // TODO: передать 2 idm, 2 rhs;
 
-                IOSAResult iosaResult = SIMUS.runIOSA(inputData, iosaConstraint, 20, 0); // TODO: настроить testCount, successCountMin
+                IOSAResult iosaResult = SIMUS.runIOSA(inputData, iosaConstraint, 20, 1); // TODO: настроить testCount, successCountMin
                 System.err.println("successCount = " + iosaResult.getSuccessCount()); // TODO: kill this
                 if (iosaResult.getIsSuccess()) {
                     iosaResult.printPMatrix();
                     showPieChart(iosaResult, 0);
                 } else {
-                    // TODO: Сообщить юзеру, что успех метода на рандомных данных < 500/5000
+                    JOptionPane.showMessageDialog(MainForm.this, "The solution is not found!");
                 }
             }
         });
+
+        reCreateTable();
     }
 
     public static void main(String[] args) {
         new MainForm();
     }
 
+    private void reCreateTable(){
+        // start of code for horizontal headers
+        ListModel lm = new AbstractListModel() {
+            public int getSize() {
+                return inputData.criteriaCount();
+            }
+
+            public Object getElementAt(int index) {
+                return "C-" + index;
+            }
+        };
+
+        JList rowHeader = new JList(lm);
+        rowHeader.setFixedCellWidth(50);
+        rowHeader.setCellRenderer(new RowHeaderRenderer(table1));
+        rowHeader.setFixedCellHeight(table1.getRowHeight());
+        scrollPan1.setRowHeaderView(rowHeader);
+        // end of code for horizontal headers
+
+        int criteriaCount = (int) spinner1.getValue();
+        int alternativeCount = (int) spinner2.getValue();
+
+
+        inputData = Init.generateRndData(new ConstraintData(criteriaCount, alternativeCount, 0, 100, 5000, 14000 * alternativeCount), 2);
+        TableModel model = new InputDataTableModel(inputData);
+        table1.setModel(model);
+
+        JComboBox b = new JComboBox(new String[]{">", "<", ">=", "<=", "="});
+
+        table1.getColumnModel().getColumn(inputData.alternativeCount()).setCellEditor(new DefaultCellEditor(b));
+    }
+
 
     private PieChart createChart(IOSAResult iosaResult, int rank){
-        PieChart chart = new PieChartBuilder().width(800).height(600).title("rank: " + (rank + 1)).theme(Styler.ChartTheme.GGPlot2).build();
+        PieChart chart = new PieChartBuilder().width(800).height(600).title("success rate: " + Support.round(iosaResult.getSuccessCount() * 100 / iosaResult.getTestCount(), 2) + "%").theme(Styler.ChartTheme.GGPlot2).build();
 
         // Customize Chart
         chart.getStyler().setLegendVisible(false);
@@ -168,11 +172,6 @@ public class MainForm extends JFrame {
         infoPanel.setSize(800, 100);
         infoPanel.add(jl_rank);
         infoPanel.add(jsp_rank);
-
-
-
-        // Определение менеджера расположения
-
 
 
         // TODO:

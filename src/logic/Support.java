@@ -11,7 +11,7 @@ package logic;
  */
 public class Support {
     
-    private static double round(double value, int places){
+    public static double round(double value, int places){
          long res = 1;
          for(int i = 0; i < places; i++)
              res*=10;
