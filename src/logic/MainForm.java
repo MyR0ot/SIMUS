@@ -13,13 +13,12 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableModel;
 import java.awt.*;
-
+import java.awt.dnd.DropTarget;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashSet;
 import java.util.Observable;
 import java.util.Set;
-
 
 public class MainForm extends JFrame {
 
@@ -54,7 +53,37 @@ public class MainForm extends JFrame {
         button1.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                reCreateTable();
+
+                // start of code for horizontal headers
+                ListModel lm = new AbstractListModel() {
+                    String headers[] = {"a", "b", "c", "d", "e", "f", "g", "h", "i"};
+
+                    public int getSize() { return inputData.criteriaCount(); }
+
+                    public Object getElementAt(int index) {
+                        return "C-"+ index;
+                    }
+                };
+
+                JList rowHeader = new JList(lm);
+                rowHeader.setFixedCellWidth(50);
+                rowHeader.setCellRenderer(new RowHeaderRenderer(table1));
+                rowHeader.setFixedCellHeight(table1.getRowHeight());
+                scrollPan1.setRowHeaderView(rowHeader);
+                // end of code for horizontal headers
+
+                int criteriaCount = (int)spinner1.getValue();
+                int alternativeCount = (int)spinner2.getValue();
+
+
+                inputData = Init.generateRndData(new ConstraintData(criteriaCount, alternativeCount, 0, 100, 5000, 14000*alternativeCount), 2);
+                TableModel model = new InputDataTableModel(inputData);
+                table1.setModel(model);
+
+                table1.getColumnModel().getColumn(inputData.alternativeCount() ).setCellEditor(new DefaultCellEditor(new JComboBox(new String[] {">","<",">=","<=","="})));
+                table1.getColumnModel().getColumn(inputData.alternativeCount() +2).setCellEditor(new DefaultCellEditor(new JComboBox(new String[] {"MAX","MIN"})));
+
+                System.out.println("generate");
             }
         });
         button2.addActionListener(new ActionListener() {
@@ -75,6 +104,7 @@ public class MainForm extends JFrame {
                 }
             }
         });
+
         button4.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -345,8 +375,14 @@ public class MainForm extends JFrame {
                 inputData.rhsSigns[rowIndex] = strToConsType((String) o);
             else if (columnIndex == inputData.alternativeCount() + 1)
                 inputData.rhs[rowIndex] = Double.parseDouble(o.toString());
-            else if (columnIndex == inputData.alternativeCount() + 2)
-                inputData.actions[rowIndex] = (GoalType) o;
+            else if (columnIndex == inputData.alternativeCount() + 2) {
+                if (GoalType.valueOf(((String)o).toUpperCase()) == GoalType.MAX)
+                    inputData.actions[rowIndex] = GoalType.MAX;
+                else if (GoalType.valueOf(((String)o).toUpperCase()) == GoalType.MIN)
+                    inputData.actions[rowIndex] = GoalType.MIN;
+                else
+                    throw new NullPointerException();
+            }
             else
                 inputData.idm[rowIndex][columnIndex] = Double.parseDouble(o.toString());
         }
