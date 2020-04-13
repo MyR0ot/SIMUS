@@ -137,7 +137,7 @@ public class MainForm extends JFrame {
     }
 
 
-    private PieChart createChart(IOSAResult iosaResult, int rank){
+    private PieChart createChart(IOSAResult iosaResult, int alternativeNumber){
         PieChart chart = new PieChartBuilder().width(800).height(600).title("success rate: " + Support.round(iosaResult.getSuccessCount() * 100 / iosaResult.getTestCount(), 2) + "%").theme(Styler.ChartTheme.GGPlot2).build();
 
         // Customize Chart
@@ -149,24 +149,24 @@ public class MainForm extends JFrame {
 
         // Series
         for (int i = 0; i < iosaResult.getPMatrix().length; i++) {
-            if (iosaResult.getPMatrix()[i][rank] >= 0.01)
-                chart.addSeries("A-" +  (i+1), iosaResult.getPMatrix()[i][rank]);
+            chart.addSeries("" + (i+1), iosaResult.getPMatrix()[alternativeNumber][i]);
+
         }
         return chart;
     }
 
-    public void showPieChart(IOSAResult iosaResult, int rank) {
+    public void showPieChart(IOSAResult iosaResult, int alternativeNumber) {
         iosaResult.printPMatrix();
 
-        final PieChart chart = createChart(iosaResult, rank);
+        final PieChart chart = createChart(iosaResult, alternativeNumber);
 
 
         // Create and set up the window.
         JFrame frame = new JFrame("IOSA");
 
-        JLabel jl_rank = new JLabel("rank: ");
+        JLabel jl_rank = new JLabel("A-");
         JSpinner jsp_rank = new JSpinner();
-        jsp_rank.setValue(rank + 1);
+        jsp_rank.setValue(alternativeNumber + 1);
 
         JPanel infoPanel = new JPanel();
         infoPanel.setSize(800, 100);
