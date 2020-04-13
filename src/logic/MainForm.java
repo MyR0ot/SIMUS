@@ -53,37 +53,7 @@ public class MainForm extends JFrame {
         button1.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-
-                // start of code for horizontal headers
-                ListModel lm = new AbstractListModel() {
-                    String headers[] = {"a", "b", "c", "d", "e", "f", "g", "h", "i"};
-
-                    public int getSize() { return inputData.criteriaCount(); }
-
-                    public Object getElementAt(int index) {
-                        return "C-"+ index;
-                    }
-                };
-
-                JList rowHeader = new JList(lm);
-                rowHeader.setFixedCellWidth(50);
-                rowHeader.setCellRenderer(new RowHeaderRenderer(table1));
-                rowHeader.setFixedCellHeight(table1.getRowHeight());
-                scrollPan1.setRowHeaderView(rowHeader);
-                // end of code for horizontal headers
-
-                int criteriaCount = (int)spinner1.getValue();
-                int alternativeCount = (int)spinner2.getValue();
-
-
-                inputData = Init.generateRndData(new ConstraintData(criteriaCount, alternativeCount, 0, 100, 5000, 14000*alternativeCount), 2);
-                TableModel model = new InputDataTableModel(inputData);
-                table1.setModel(model);
-
-                table1.getColumnModel().getColumn(inputData.alternativeCount() ).setCellEditor(new DefaultCellEditor(new JComboBox(new String[] {">","<",">=","<=","="})));
-                table1.getColumnModel().getColumn(inputData.alternativeCount() +2).setCellEditor(new DefaultCellEditor(new JComboBox(new String[] {"MAX","MIN"})));
-
-                System.out.println("generate");
+                reCreateTable();
             }
         });
         button2.addActionListener(new ActionListener() {
@@ -137,12 +107,10 @@ public class MainForm extends JFrame {
     private void reCreateTable(){
         // start of code for horizontal headers
         ListModel lm = new AbstractListModel() {
-            public int getSize() {
-                return inputData.criteriaCount();
-            }
+            public int getSize() { return inputData.criteriaCount(); }
 
             public Object getElementAt(int index) {
-                return "C-" + index;
+                return "C-"+ index;
             }
         };
 
@@ -153,17 +121,16 @@ public class MainForm extends JFrame {
         scrollPan1.setRowHeaderView(rowHeader);
         // end of code for horizontal headers
 
-        int criteriaCount = (int) spinner1.getValue();
-        int alternativeCount = (int) spinner2.getValue();
+        int criteriaCount = (int)spinner1.getValue();
+        int alternativeCount = (int)spinner2.getValue();
 
 
-        inputData = Init.generateRndData(new ConstraintData(criteriaCount, alternativeCount, 0, 100, 5000, 14000 * alternativeCount), 2);
+        inputData = Init.generateRndData(new ConstraintData(criteriaCount, alternativeCount, 0, 100, 5000, 14000*alternativeCount), 2);
         TableModel model = new InputDataTableModel(inputData);
         table1.setModel(model);
 
-        JComboBox b = new JComboBox(new String[]{">", "<", ">=", "<=", "="});
-
-        table1.getColumnModel().getColumn(inputData.alternativeCount()).setCellEditor(new DefaultCellEditor(b));
+        table1.getColumnModel().getColumn(inputData.alternativeCount() ).setCellEditor(new DefaultCellEditor(new JComboBox(new String[] {">","<",">=","<=","="})));
+        table1.getColumnModel().getColumn(inputData.alternativeCount() +2).setCellEditor(new DefaultCellEditor(new JComboBox(new String[] {"MAX","MIN"})));
     }
 
 
