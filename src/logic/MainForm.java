@@ -65,8 +65,8 @@ public class MainForm extends JFrame {
 
                     StringBuilder stringRanks = new StringBuilder();
                     for (int i = 0; i < ranks.length; i++) {
-                        System.out.println(ranks[i].minRank + "-" + ranks[i].maxRank);
-                        stringRanks.append(ranks[i].minRank).append("-").append(ranks[i].maxRank).append('\n');
+                        System.out.println(""+(i+1)+") [" + (ranks[i].minRank + 1) + "; " + (ranks[i].maxRank + 1 )+ "]");
+                        stringRanks.append(""+(i+1)+") [" + (ranks[i].minRank + 1) + "; " + (ranks[i].maxRank + 1 )+ "]").append('\n');
                     }
                     JOptionPane.showMessageDialog(MainForm.this, stringRanks); // TODO: сделать другую визализацию
                 } else {
