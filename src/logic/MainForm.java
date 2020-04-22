@@ -65,12 +65,17 @@ public class MainForm extends JFrame {
 
                     StringBuilder stringRanks = new StringBuilder();
                     for (int i = 0; i < ranks.length; i++) {
-                        System.out.println(""+(i+1)+") [" + (ranks[i].minRank + 1) + "; " + (ranks[i].maxRank + 1 )+ "]");
-                        stringRanks.append(""+(i+1)+") [" + (ranks[i].minRank + 1) + "; " + (ranks[i].maxRank + 1 )+ "]").append('\n');
+                        if(ranks[i].minRank == ranks[i].maxRank){
+                            System.out.println("A-"+(i+1)+": " + (ranks[i].minRank + 1));
+                            stringRanks.append("A-"+(i+1)+": " + (ranks[i].minRank + 1)).append('\n');
+                        }else{
+                            System.out.println("A-"+(i+1)+": [" + (ranks[i].minRank + 1) + "; " + (ranks[i].maxRank + 1 )+ "]");
+                            stringRanks.append("A-"+(i+1)+": [" + (ranks[i].minRank + 1) + "; " + (ranks[i].maxRank + 1 )+ "]").append('\n');
+                        }
                     }
-                    JOptionPane.showMessageDialog(MainForm.this, stringRanks); // TODO: сделать другую визализацию
+                    JOptionPane.showMessageDialog(null, stringRanks, "Ranks of alternatives", JOptionPane.INFORMATION_MESSAGE);
                 } else {
-                    JOptionPane.showMessageDialog(MainForm.this, "The solution is not found!");
+                    JOptionPane.showMessageDialog(null, "The solution is not found!", "SIMUS standalone", JOptionPane.INFORMATION_MESSAGE);
                 }
             }
         });
