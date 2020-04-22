@@ -46,14 +46,14 @@ public class MainForm extends JFrame {
         setTitle("SIMUS standalone");
         setVisible(true);
 
-        spinner1.setValue(7);
-        spinner2.setValue(12);
+        spinner1.setValue(25);
+        spinner2.setValue(6);
 
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         button1.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                reCreateTable();
+                reCreateTable(false);
             }
         });
         button2.addActionListener(new ActionListener() {
@@ -87,7 +87,6 @@ public class MainForm extends JFrame {
                         inputData.rhs); // TODO: передать 2 idm, 2 rhs;
 
                 IOSAResult iosaResult = SIMUS.runIOSA(inputData, iosaConstraint, 20, 1); // TODO: настроить testCount, successCountMin
-                System.err.println("successCount = " + iosaResult.getSuccessCount()); // TODO: kill this
                 if (iosaResult.getIsSuccess()) {
                     iosaResult.printPMatrix();
                     showPieChart(iosaResult, 0);
@@ -97,14 +96,14 @@ public class MainForm extends JFrame {
             }
         });
 
-        reCreateTable();
+        reCreateTable(true);
     }
 
     public static void main(String[] args) {
         new MainForm();
     }
 
-    private void reCreateTable(){
+    private void reCreateTable(boolean isEmpty){
         // start of code for horizontal headers
         ListModel lm = new AbstractListModel() {
             public int getSize() { return inputData.criteriaCount(); }
@@ -125,7 +124,8 @@ public class MainForm extends JFrame {
         int alternativeCount = (int)spinner2.getValue();
 
 
-        inputData = Init.generateRndData(new ConstraintData(criteriaCount, alternativeCount, 0, 100, 5000, 14000*alternativeCount), 2);
+        if(isEmpty) inputData = Init.generateRndData(true, new ConstraintData(criteriaCount, alternativeCount, 0, 0, 0, 0), 0);
+        else inputData = Init.generateRndData(false, new ConstraintData(criteriaCount, alternativeCount, 0, 100, 5000, 14000*alternativeCount), 2);
         TableModel model = new InputDataTableModel(inputData);
         table1.setModel(model);
 
