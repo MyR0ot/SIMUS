@@ -18,6 +18,8 @@ public final class SIMUS {
     private final double[] pf; // participation factor
     private final double[] sc; // sum of column
     private final Rank[] ranks; // result ranks for each alternative
+    private final double[] weights;
+    private final boolean hasWeights;
 
     private String log = "";
     private String errorLog = "";
@@ -38,6 +40,10 @@ public final class SIMUS {
 
     public Rank[] getRanks() {
         return this.ranks;
+    }
+
+    public double[] getWeights() {
+        return this.weights;
     }
 
     /**
@@ -62,10 +68,18 @@ public final class SIMUS {
         sc = new double[alternativeCount];
         ranks = new Rank[alternativeCount];
 
+
         for (int i = 0; i < criterionCount; i++) {
             for (int j = 0; j < alternativeCount; j++) {
                 erm[i][j] = 0;
             }
+        }
+        if(data.weights != null){
+            this.weights = data.weights.clone();
+            hasWeights = true;
+        } else {
+            this.weights = null;
+            hasWeights = false;
         }
     }
 
@@ -129,8 +143,14 @@ public final class SIMUS {
             int countEqual = 0;
             int countGreat = 0;
             for (int j = 0; j < alternativeCount; j++) {
-                if (sc[i] * pf[i] < sc[j] * pf[j]) countGreat++;
-                if (sc[i] * pf[i] == sc[j] * pf[j]) countEqual++;
+                if (hasWeights){
+                    if (sc[i] * pf[i] * weights[i] < sc[j] * pf[j]* weights[j]) countGreat++;
+                    if (sc[i] * pf[i] * weights[i] == sc[j] * pf[j]* weights[j]) countEqual++;
+                } else {
+                    if (sc[i] * pf[i] < sc[j] * pf[j]) countGreat++;
+                    if (sc[i] * pf[i] == sc[j] * pf[j]) countEqual++;
+                }
+
             }
             ranks[i] = new Rank(countGreat, countGreat + countEqual - 1);
         }

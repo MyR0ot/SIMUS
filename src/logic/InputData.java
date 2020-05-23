@@ -5,8 +5,6 @@
  */
 package logic;
 
-import java.util.Arrays;
-
 import it.ssc.pl.milp.ConsType;
 import it.ssc.pl.milp.GoalType;
 
@@ -19,6 +17,7 @@ public class InputData {
     public double[] rhs;
     public ConsType[] rhsSigns; 
     public GoalType[] actions;
+    public double[] weights;
     
     
     public int alternativeCount() {
@@ -34,6 +33,7 @@ public class InputData {
     	this.rhs = null;
     	this.rhsSigns = null;
     	this.actions = null;
+    	this.weights = null;
     }
     
     public InputData(InputData data) {
@@ -44,6 +44,7 @@ public class InputData {
         this.rhs = data.rhs.clone();
         this.rhsSigns = data.rhsSigns.clone();
         this.actions = data.actions.clone();
+        this.weights = data.weights.clone();
     }
     
     public InputData copy() {
