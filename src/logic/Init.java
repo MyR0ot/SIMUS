@@ -266,6 +266,7 @@ public class Init {
         }
     }
 
+    @Deprecated
     private static String testNxM(int n, int m) {
         String folderName = (String.valueOf(n) + "x" + String.valueOf(m));
         ConstraintData constraint = new ConstraintData(n, m, 0, 100, 5000, 70000);

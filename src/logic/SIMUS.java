@@ -4,7 +4,6 @@ import it.ssc.pl.milp.*;
 import it.ssc.pl.milp.util.LPThreadsNumber;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public final class SIMUS {
 
@@ -28,7 +27,6 @@ public final class SIMUS {
     public double[][] getERM() {
         return this.erm;
     }
-
 
     public String getLog() {
         return this.log;
@@ -234,17 +232,6 @@ public final class SIMUS {
             array[i] /= tmpSum;
     }
 
-    @Deprecated
-    private void showErm() {
-        System.out.println("ERM:");
-        for (int i = 0; i < this.erm.length; i++) {
-            for (int j = 0; j < this.erm[i].length; j++)
-                System.out.print(this.erm[i][j] + " ");
-            System.out.println();
-        }
-    }
-
-
     private static Solution SIMPLEX(double[][] A,
                                     double[] c,
                                     double[] b,
@@ -268,20 +255,47 @@ public final class SIMUS {
         return null;
     }
 
-    @Deprecated
-    public static void printOF(LinearObjectiveFunction of) {
-        for (double value : of.getC()) {
-            System.out.print(value + " ");
-        }
-        System.out.println();
+    public static IOSAResult runIOSA(InputData inputData, IOSAConstraint iosaConstraint) {
+        return runIOSA(inputData, iosaConstraint, 5000, 500);
     }
 
-    @Deprecated
-    public static void printConstraints(ArrayList<Constraint> constraints) {
-        for (int i = 0; i < constraints.size(); i++) {
-            System.out.print(constraints.get(i).getRhs() + " ");
+    public static IOSAResult runIOSA(InputData inputData, IOSAConstraint iosaConstraint, int testCount, int successCountMin) {
+        int successCount = 0;
+
+        double[][] pMatrix = new double[inputData.alternativeCount()][inputData.alternativeCount()];
+        for (int i = 0; i < pMatrix.length; i++)
+            for (int j = 0; j < pMatrix[0].length; j++)
+                pMatrix[i][j] = 0;
+
+
+        for (int i = 0; i < testCount; i++) {
+            generateNextData(inputData, iosaConstraint);
+            SIMUS simus = new SIMUS(inputData);
+            if (simus.runLogic()) {
+                successCount++;
+                for(int r = 0; r < simus.ranks.length; r++){
+                    double incValue = 1.0 / (simus.ranks[r].maxRank - simus.ranks[r].minRank + 1);
+                    for(int curRank = simus.ranks[r].minRank; curRank <= simus.ranks[r].maxRank; curRank++)
+                        pMatrix[r][curRank] += incValue;
+                }
+            }
         }
-        System.out.println();
+
+        normalize(pMatrix);
+        if(successCount < successCountMin)
+            return new IOSAResult(false, testCount, successCount, pMatrix);
+        else
+            return new IOSAResult(true, testCount, successCount, pMatrix);
+    }
+
+    private static void generateNextData(InputData inputData, IOSAConstraint iosaConstraint) {
+        for (int i = 0; i < inputData.rhs.length; i++) {
+            inputData.rhs[i] = iosaConstraint.minRhs[i] + Math.random() * (iosaConstraint.maxRhs[i] - iosaConstraint.minRhs[i]);
+        }
+
+        for (int i = 0; i < inputData.idm.length; i++)
+            for (int j = 0; j < inputData.idm[0].length; j++)
+                inputData.idm[i][j] = iosaConstraint.minIdm[i][j] + Math.random() * (iosaConstraint.maxIdm[i][j] - iosaConstraint.minIdm[i][j]);
     }
 
     @Override
@@ -335,6 +349,25 @@ public final class SIMUS {
         return builder.toString();
     }
 
+
+
+    @Deprecated
+    public static void printOF(LinearObjectiveFunction of) {
+        for (double value : of.getC()) {
+            System.out.print(value + " ");
+        }
+        System.out.println();
+    }
+
+    @Deprecated
+    public static void printConstraints(ArrayList<Constraint> constraints) {
+        for (int i = 0; i < constraints.size(); i++) {
+            System.out.print(constraints.get(i).getRhs() + " ");
+        }
+        System.out.println();
+    }
+
+    @Deprecated
     private static double round(double number, int scale) {
         int pow = 10;
         for (int i = 1; i < scale; i++) {
@@ -344,47 +377,13 @@ public final class SIMUS {
         return (double) (int) ((tmp - (int) tmp) >= 0.5 ? tmp + 1 : tmp) / pow;
     }
 
-
-    public static IOSAResult runIOSA(InputData inputData, IOSAConstraint iosaConstraint) {
-        return runIOSA(inputData, iosaConstraint, 5000, 500);
-    }
-
-    public static IOSAResult runIOSA(InputData inputData, IOSAConstraint iosaConstraint, int testCount, int successCountMin) {
-        int successCount = 0;
-
-        double[][] pMatrix = new double[inputData.alternativeCount()][inputData.alternativeCount()];
-        for (int i = 0; i < pMatrix.length; i++)
-            for (int j = 0; j < pMatrix[0].length; j++)
-                pMatrix[i][j] = 0;
-
-
-        for (int i = 0; i < testCount; i++) {
-            generateNextData(inputData, iosaConstraint);
-            SIMUS simus = new SIMUS(inputData);
-            if (simus.runLogic()) {
-                successCount++;
-                for(int r = 0; r < simus.ranks.length; r++){
-                    double incValue = 1.0 / (simus.ranks[r].maxRank - simus.ranks[r].minRank + 1);
-                    for(int curRank = simus.ranks[r].minRank; curRank <= simus.ranks[r].maxRank; curRank++)
-                        pMatrix[r][curRank] += incValue;
-                }
-            }
+    @Deprecated
+    private void showErm() {
+        System.out.println("ERM:");
+        for (int i = 0; i < this.erm.length; i++) {
+            for (int j = 0; j < this.erm[i].length; j++)
+                System.out.print(this.erm[i][j] + " ");
+            System.out.println();
         }
-
-        normalize(pMatrix);
-        if(successCount < successCountMin)
-            return new IOSAResult(false, testCount, successCount, pMatrix);
-        else
-            return new IOSAResult(true, testCount, successCount, pMatrix);
-    }
-
-    private static void generateNextData(InputData inputData, IOSAConstraint iosaConstraint) {
-        for (int i = 0; i < inputData.rhs.length; i++) {
-            inputData.rhs[i] = iosaConstraint.minRhs[i] + Math.random() * (iosaConstraint.maxRhs[i] - iosaConstraint.minRhs[i]);
-        }
-
-        for (int i = 0; i < inputData.idm.length; i++)
-            for (int j = 0; j < inputData.idm[0].length; j++)
-                inputData.idm[i][j] = iosaConstraint.minIdm[i][j] + Math.random() * (iosaConstraint.maxIdm[i][j] - iosaConstraint.minIdm[i][j]);
     }
 }

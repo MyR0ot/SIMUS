@@ -2,7 +2,9 @@ package logic;
 
 import it.ssc.pl.milp.ConsType;
 import it.ssc.pl.milp.GoalType;
-import org.knowm.xchart.*;
+import org.knowm.xchart.PieChart;
+import org.knowm.xchart.PieChartBuilder;
+import org.knowm.xchart.XChartPanel;
 import org.knowm.xchart.style.PieStyler;
 import org.knowm.xchart.style.Styler;
 
@@ -13,11 +15,9 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableModel;
 import java.awt.*;
-import java.awt.dnd.DropTarget;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashSet;
-import java.util.Observable;
 import java.util.Set;
 
 public class MainForm extends JFrame {
@@ -95,6 +95,8 @@ public class MainForm extends JFrame {
                 if (iosaResult.getIsSuccess()) {
                     iosaResult.printPMatrix();
                     showPieChart(iosaResult, 0);
+                    iosaResult.exportToEXCEL("SMAA_Result.xlsx");
+
                 } else {
                     JOptionPane.showMessageDialog(MainForm.this, "The solution is not found!");
                 }
@@ -164,7 +166,7 @@ public class MainForm extends JFrame {
 
 
         // Create and set up the window.
-        JFrame frame = new JFrame("IOSA");
+        JFrame frame = new JFrame("SMAA");
 
         JLabel jl_rank = new JLabel("A-");
         JSpinner jsp_rank = new JSpinner();
