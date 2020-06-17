@@ -10,7 +10,7 @@ import java.io.FileOutputStream;
 import java.util.Arrays;
 
 
-final class IOSAResult {
+final class SMAAResult {
     private final double[][] pMatrix;
     private final int testCount;
     private final int successCount;
@@ -18,8 +18,7 @@ final class IOSAResult {
 
     private static final int MAX_COLUMN_SIZE = 15;
 
-
-    public IOSAResult(Boolean isSuccess, int testCount, int successCount, double[][] pMatrix) {
+    public SMAAResult(Boolean isSuccess, int testCount, int successCount, double[][] pMatrix) {
         this.isSuccess = isSuccess;
         this.testCount = testCount;
         this.successCount = successCount;
@@ -56,21 +55,18 @@ final class IOSAResult {
         exportToEXCEL("SMAA_Report.xlsx");
     }
 
-
     public void exportToEXCEL(String fileName) {
         try {
-            int sizeMatrix = pMatrix.length;
             XSSFWorkbook book = new XSSFWorkbook();
             FileOutputStream fileOut = new FileOutputStream(fileName);
-            XSSFSheet sheet = book.createSheet("Sheet 1"); // создания страниц
-
+            XSSFSheet sheet = book.createSheet("SMAA Result"); // создание страниц
             XSSFRow xssRow = sheet.createRow(0);
-            for (int j = 1; j <= sizeMatrix; j++) {
+
+            for (int j = 1; j <= pMatrix.length; j++) {
                 XSSFCell cell = xssRow.createCell(j);
                 cell.setCellType(CellType.STRING);
-                cell.setCellValue("P-"+ j);
-            }
-
+                cell.setCellValue("R"+ j);
+            } // создание рамки
             for (int row = 0; row < pMatrix.length; row++) {
                 xssRow = sheet.createRow(row + 1);
                 XSSFCell cell = xssRow.createCell(0);
@@ -82,14 +78,12 @@ final class IOSAResult {
                     cell.setCellType(CellType.NUMERIC);
                     cell.setCellValue(pMatrix[row][column]);
                 }
-            }
-
+            } // заполнение матрицы
 
             book.write(fileOut);
             fileOut.close();
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-
     }
 }

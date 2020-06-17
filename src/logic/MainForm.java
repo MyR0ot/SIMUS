@@ -91,7 +91,7 @@ public class MainForm extends JFrame {
                         inputData.rhs,
                         inputData.rhs); // TODO: передать 2 idm, 2 rhs;
 
-                IOSAResult iosaResult = SIMUS.runIOSA(inputData, iosaConstraint, 20, 1); // TODO: настроить testCount, successCountMin
+                SMAAResult iosaResult = SIMUS.runIOSA(inputData, iosaConstraint, 20, 1); // TODO: настроить testCount, successCountMin
                 if (iosaResult.getIsSuccess()) {
                     iosaResult.printPMatrix();
                     showPieChart(iosaResult, 0);
@@ -141,7 +141,7 @@ public class MainForm extends JFrame {
     }
 
 
-    private PieChart createChart(IOSAResult iosaResult, int alternativeNumber){
+    private PieChart createChart(SMAAResult iosaResult, int alternativeNumber){
         PieChart chart = new PieChartBuilder().width(800).height(600).title("success rate: " + Support.round(iosaResult.getSuccessCount() * 100 / iosaResult.getTestCount(), 2) + "%").theme(Styler.ChartTheme.GGPlot2).build();
 
         // Customize Chart
@@ -159,7 +159,7 @@ public class MainForm extends JFrame {
         return chart;
     }
 
-    public void showPieChart(IOSAResult iosaResult, int alternativeNumber) {
+    public void showPieChart(SMAAResult iosaResult, int alternativeNumber) {
         iosaResult.printPMatrix();
 
         final PieChart chart = createChart(iosaResult, alternativeNumber);

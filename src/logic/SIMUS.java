@@ -255,11 +255,11 @@ public final class SIMUS {
         return null;
     }
 
-    public static IOSAResult runIOSA(InputData inputData, IOSAConstraint iosaConstraint) {
+    public static SMAAResult runIOSA(InputData inputData, IOSAConstraint iosaConstraint) {
         return runIOSA(inputData, iosaConstraint, 5000, 500);
     }
 
-    public static IOSAResult runIOSA(InputData inputData, IOSAConstraint iosaConstraint, int testCount, int successCountMin) {
+    public static SMAAResult runIOSA(InputData inputData, IOSAConstraint iosaConstraint, int testCount, int successCountMin) {
         int successCount = 0;
 
         double[][] pMatrix = new double[inputData.alternativeCount()][inputData.alternativeCount()];
@@ -283,9 +283,9 @@ public final class SIMUS {
 
         normalize(pMatrix);
         if(successCount < successCountMin)
-            return new IOSAResult(false, testCount, successCount, pMatrix);
+            return new SMAAResult(false, testCount, successCount, pMatrix);
         else
-            return new IOSAResult(true, testCount, successCount, pMatrix);
+            return new SMAAResult(true, testCount, successCount, pMatrix);
     }
 
     private static void generateNextData(InputData inputData, IOSAConstraint iosaConstraint) {
