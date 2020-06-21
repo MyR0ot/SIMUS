@@ -85,13 +85,13 @@ public class MainForm extends JFrame {
             public void actionPerformed(ActionEvent actionEvent) {
 
                 // TODO: получить iosaConstraint
-                IOSAConstraint iosaConstraint = new IOSAConstraint(
+                SMAAConstraint smaaConstraint = new SMAAConstraint(
                         multIDM(inputData.idm, 0.95),
                         multIDM(inputData.idm, 1.05),
                         inputData.rhs,
                         inputData.rhs); // TODO: передать 2 idm, 2 rhs;
 
-                SMAAResult iosaResult = SIMUS.runIOSA(inputData, iosaConstraint, 20, 1); // TODO: настроить testCount, successCountMin
+                SMAAResult iosaResult = SIMUS.runIOSA(inputData, smaaConstraint, 20, 1); // TODO: настроить testCount, successCountMin
                 if (iosaResult.getIsSuccess()) {
                     iosaResult.printPMatrix();
                     showPieChart(iosaResult, 0);

@@ -1,15 +1,13 @@
 package logic;
 
-import java.util.Arrays;
-
-public class IOSAConstraint {
+public class SMAAConstraint {
 	public double[][] minIdm;
 	public double[][] maxIdm;
 
 	public double[] minRhs;
 	public double[] maxRhs;
 	
-	public IOSAConstraint(double[][] minIdm, double[][] maxIdm, double[] minRhs, double[] maxRhs) {
+	public SMAAConstraint(double[][] minIdm, double[][] maxIdm, double[] minRhs, double[] maxRhs) {
 		this.minIdm = minIdm.clone();
 		for(int i = 0; i<minIdm.length; i++)
 			this.minIdm[i] = minIdm[i].clone();

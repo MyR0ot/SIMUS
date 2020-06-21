@@ -294,7 +294,7 @@ public class Init {
         return count;
     }
 
-    private static double IOSASimus(InputData data, IOSAConstraint iosaConstraint, int countTests) {
+    private static double IOSASimus(InputData data, SMAAConstraint SMAAConstraint, int countTests) {
         int countSuccess = 0;
 
         int alternativeCount = data.alternativeCount();
@@ -305,7 +305,7 @@ public class Init {
                 rankMatrix[i][j] = 0;
 
         for (int i = 0; i < countTests; i++) {
-            InputData rndData = generateData(data, iosaConstraint);
+            InputData rndData = generateData(data, SMAAConstraint);
             SIMUS simus = new SIMUS(rndData);
             if (simus.runLogic()) {
                 countSuccess++;
@@ -323,17 +323,17 @@ public class Init {
         return countSuccess * 1.0 / countTests;
     }
 
-    private static InputData generateData(InputData data, IOSAConstraint iosaConstraint) {
+    private static InputData generateData(InputData data, SMAAConstraint SMAAConstraint) {
 
         InputData rndData = data.copy();
 
         for (int i = 0; i < rndData.idm.length; i++)
             for (int j = 0; j < rndData.idm[i].length; j++) {
-                rndData.idm[i][j] = iosaConstraint.minIdm[i][j] + Math.random() * (iosaConstraint.maxIdm[i][j] - iosaConstraint.minIdm[i][j]);
+                rndData.idm[i][j] = SMAAConstraint.minIdm[i][j] + Math.random() * (SMAAConstraint.maxIdm[i][j] - SMAAConstraint.minIdm[i][j]);
             }
 
         for (int i = 0; i < rndData.rhs.length; i++)
-            rndData.rhs[i] = iosaConstraint.minRhs[i] + Math.random() * (iosaConstraint.maxRhs[i] - iosaConstraint.minRhs[i]);
+            rndData.rhs[i] = SMAAConstraint.minRhs[i] + Math.random() * (SMAAConstraint.maxRhs[i] - SMAAConstraint.minRhs[i]);
 
         return rndData;
     }

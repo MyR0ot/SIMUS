@@ -255,11 +255,11 @@ public final class SIMUS {
         return null;
     }
 
-    public static SMAAResult runIOSA(InputData inputData, IOSAConstraint iosaConstraint) {
-        return runIOSA(inputData, iosaConstraint, 5000, 500);
+    public static SMAAResult runIOSA(InputData inputData, SMAAConstraint SMAAConstraint) {
+        return runIOSA(inputData, SMAAConstraint, 5000, 500);
     }
 
-    public static SMAAResult runIOSA(InputData inputData, IOSAConstraint iosaConstraint, int testCount, int successCountMin) {
+    public static SMAAResult runIOSA(InputData inputData, SMAAConstraint SMAAConstraint, int testCount, int successCountMin) {
         int successCount = 0;
 
         double[][] pMatrix = new double[inputData.alternativeCount()][inputData.alternativeCount()];
@@ -269,7 +269,7 @@ public final class SIMUS {
 
 
         for (int i = 0; i < testCount; i++) {
-            generateNextData(inputData, iosaConstraint);
+            generateNextData(inputData, SMAAConstraint);
             SIMUS simus = new SIMUS(inputData);
             if (simus.runLogic()) {
                 successCount++;
@@ -288,14 +288,14 @@ public final class SIMUS {
             return new SMAAResult(true, testCount, successCount, pMatrix);
     }
 
-    private static void generateNextData(InputData inputData, IOSAConstraint iosaConstraint) {
+    private static void generateNextData(InputData inputData, SMAAConstraint SMAAConstraint) {
         for (int i = 0; i < inputData.rhs.length; i++) {
-            inputData.rhs[i] = iosaConstraint.minRhs[i] + Math.random() * (iosaConstraint.maxRhs[i] - iosaConstraint.minRhs[i]);
+            inputData.rhs[i] = SMAAConstraint.minRhs[i] + Math.random() * (SMAAConstraint.maxRhs[i] - SMAAConstraint.minRhs[i]);
         }
 
         for (int i = 0; i < inputData.idm.length; i++)
             for (int j = 0; j < inputData.idm[0].length; j++)
-                inputData.idm[i][j] = iosaConstraint.minIdm[i][j] + Math.random() * (iosaConstraint.maxIdm[i][j] - iosaConstraint.minIdm[i][j]);
+                inputData.idm[i][j] = SMAAConstraint.minIdm[i][j] + Math.random() * (SMAAConstraint.maxIdm[i][j] - SMAAConstraint.minIdm[i][j]);
     }
 
     @Override
